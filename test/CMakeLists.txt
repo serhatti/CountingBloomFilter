@@ -1,0 +1,7 @@
+FILE(GLOB CPPFiles *.cpp)
+foreach(EXECSRC ${CPPFiles})
+    get_filename_component(appname ${EXECSRC} NAME_WE  )
+    add_executable(${appname} ${EXECSRC} )
+    target_include_directories(${appname} PUBLIC ${PROJECT_SOURCE_DIR}/BloomFilter)
+    install (TARGETS ${appname} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+endforeach()
