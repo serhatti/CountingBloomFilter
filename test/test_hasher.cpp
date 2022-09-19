@@ -2,7 +2,6 @@
     author : Serhat Istin
            : istins@gmail.com
 */
-#include <argp.h>
 #include <bits/stdc++.h>
 
 #include <fstream>
@@ -12,18 +11,23 @@
 #include "Hasher.h"
 
 int main(int argc, char **argv) {
+  const char *dict = std::getenv("BF_DICT");
+  auto words_file = std::ifstream(dict);
+  if (!words_file) {
+    throw std::runtime_error("Dictionary file not found");
+  }
   auto beginclk = std::chrono::high_resolution_clock::now();
 
   Hasher<std::string> hasher;
 
   std::unordered_set<uint64_t> hash_values;
   std::unordered_set<std::string> unique_words;
-  auto words_file = std::ifstream("onemillionwords.txt");
 
   std::string line;
   int insert_count = 0;
   while (getline(words_file, line)) {
-    if (line[0] == '#' || line[0] == '/') continue;
+    if (line[0] == '#' || line[0] == '/')
+      continue;
     unique_words.insert(line);
   }
   insert_count = unique_words.size();
