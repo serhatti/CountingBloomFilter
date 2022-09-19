@@ -25,9 +25,9 @@ uint64_t Hasher<T>::operator()(const T& v, int offset) const {
   int p = 0;
   for (auto el : v) {
     if (p % 2 == 0)
-      el += 0x85ebca6b * (offset + 1);
+      el *= 0x85ebca6b * (offset + 1);
     else
-      el += 0xc2b2ae35 * (offset - 1);
+      el *= 0xc2b2ae35 * (offset - 1);
     init ^= el + 0x9e3779b9 + (init << 6) + (init >> 2);
     p++;
   }
