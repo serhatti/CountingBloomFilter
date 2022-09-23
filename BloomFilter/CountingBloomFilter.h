@@ -154,7 +154,7 @@ void CountingBloomFilter<T>::AutoSetParameters(double n, double p) {
 
 template <typename T>
 std::vector<uint64_t> CountingBloomFilter<T>::BloomHash(const T& item) const {
-  std::vector<uint64_t> result(m_n_counting_bits);
+  std::vector<uint64_t> result(m_num_hashes);
   std::iota(result.begin(), result.end(), 0);
   std::for_each(result.begin(), result.end(),
                 [&item, this](uint64_t& n) { n = m_hasher(item, n); });
