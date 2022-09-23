@@ -86,7 +86,7 @@ class CountingBloomFilter {
   std::unique_ptr<Bits> m_bits;
   Hasher<T> m_hasher;
 
-  void AutoSetParameters(double n, double p = 0.05);
+  void AutoSetParameters(double n, double p = 0.03);
   std::vector<uint64_t> BloomHash(const T&) const;
   std::vector<uint64_t> CounterBitIndices(uint64_t) const;
   void IncrementCounter(const std::vector<uint64_t>&);
