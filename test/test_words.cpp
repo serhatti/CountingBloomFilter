@@ -19,11 +19,11 @@ int main() {
   auto beginclk = std::chrono::high_resolution_clock::now();
 
   const int n_count_bits = 5;
-  double n_expected = 4E5;
+  uint64_t n_expected = 4E5;
   CountingBloomFilter<std::string> bf(n_expected, n_count_bits);
 
   auto PrintQuery = [&bf](const std::string &s) {
-    int count = bf.Count(s);
+    uint64_t count = bf.Count(s);
     if (count > 0) {
       std::cout << "\t--> \'" << s << "\': exists <= " << count << " times"
                 << std::endl;
@@ -34,7 +34,8 @@ int main() {
 
   std::string buff;
   while (getline(words_file, buff)) {
-    if (buff[0] == '#' || buff[0] == '/') continue;
+    if (buff[0] == '#' || buff[0] == '/')
+      continue;
     bf.Insert(buff);
   }
 

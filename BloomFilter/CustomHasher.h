@@ -15,7 +15,7 @@
  */
 
 template <>
-uint64_t Hasher<Custom>::operator()(const Custom& itm, int offset) const {
+uint64_t Hasher<Custom>::operator()(const Custom &itm, uint64_t offset) const {
   // Below is not the only possible hashing for <Custom> .
   auto hasher_vec_int = Hasher<std::vector<int>>();
   auto hasher_vec_int32 = Hasher<std::vector<uint64_t>>();

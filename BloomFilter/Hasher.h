@@ -14,16 +14,14 @@ author : Serhat Istin
 #include <cstdint>
 template <class T> class Hasher {
 public:
-  uint64_t operator()(const T &, int offset = 0) const;
+  uint64_t operator()(const T &, uint64_t offset = 0) const;
 };
 
 template <class T>
-uint64_t Hasher<T>::operator()(const T &v, int offset) const {
+uint64_t Hasher<T>::operator()(const T &v, uint64_t offset) const {
   uint64_t init = v.size();
-  //int p = 0;
   for (uint64_t el : v) {
-    //if (p % 2 == 0) {
-    if(el&1){
+    if (el & 1) {
       el += offset;
       el ^= el << (offset + 1);
     } else {
@@ -31,7 +29,6 @@ uint64_t Hasher<T>::operator()(const T &v, int offset) const {
       el ^= el >> (offset + 1);
     }
     init ^= el + 0x9e3779b9 + (init << 11) + (init >> 4);
-    //p++;
   }
   return init;
 }

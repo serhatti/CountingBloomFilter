@@ -2,10 +2,10 @@ cmake_minimum_required (VERSION  3.0)
 
 project(BloomFilter)
 
-set(CMAKE_CXX_FLAGS "-pedantic -Wshadow -Wfloat-equal -Wextra -Wfatal-errors -O3")
+set(CMAKE_CXX_FLAGS "-pedantic -Werror=conversion -Wshadow -Werror=float-equal -Wextra -Wfatal-errors -O3 -Wall")
 
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_INSTALL_PREFIX  ${CMAKE_CURRENT_BINARY_DIR})
+    set(CMAKE_INSTALL_PREFIX  ${CMAKE_CURRENT_BINARY_DIR} CACHE STRING " " FORCE)
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 install(DIRECTORY BloomFilter DESTINATION ${CMAKE_INSTALL_PREFIX}/include)

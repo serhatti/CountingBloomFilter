@@ -58,7 +58,7 @@ private:
   std::unique_ptr<Bits> m_bits;
   Hasher<T> m_hasher;
 
-  void AutoSetParameters(double n, double p = 0.03);
+  void AutoSetParameters(uint64_t n, double p = 0.03);
   std::vector<uint64_t> BloomHash(const T &) const;
   std::vector<uint64_t> CounterBitIndices(uint64_t) const;
   void IncrementCounter(const std::vector<uint64_t> &);
@@ -76,7 +76,7 @@ CountingBloomFilter<T>::CountingBloomFilter(uint64_t n_expected,
 template <typename T> CountingBloomFilter<T>::~CountingBloomFilter() {}
 
 template <typename T>
-void CountingBloomFilter<T>::AutoSetParameters(double n, double p) {
+void CountingBloomFilter<T>::AutoSetParameters(uint64_t n, double p) {
   const double kappa_stars[30] = {
       0.6931, 0.9326, 1.1635, 1.3893, 1.6117, 1.8317, 2.0498, 2.2664,
       2.4818, 2.6963, 2.9099, 3.1228, 3.3351, 3.5469, 3.7582, 3.9690,
@@ -93,8 +93,8 @@ void CountingBloomFilter<T>::AutoSetParameters(double n, double p) {
     kappa = kappa_stars[theta - 1];
   }
 
-  m_width = -n * log(p) / pow(log(2), 2);
-  m_num_hashes = ceil((double(m_width) / n) * log(2));
+  m_width = uint64_t(ceil(-double(n) * log(p) / pow(log(2), 2)));
+  m_num_hashes = int(ceil((double(m_width) / double(n)) * log(2)));
 
   if (m_width * m_n_counting_bits > max_allowed_nbits) {
     std::cout << "WARNING : too many expected items and not enough memory \n";
@@ -102,21 +102,20 @@ void CountingBloomFilter<T>::AutoSetParameters(double n, double p) {
     std::cout << "\t setting n from " << n << std::setprecision(2) << " to "
               << double(m_width) << "\n";
     n = m_width;
-    // filter will be saturated beyond m_n_max inserts
-    m_n_max = (m_width / m_num_hashes) * kappa;
-    // use m/n =1
-    m_num_hashes = ceil(kappa);
+    m_n_max = uint64_t(ceil((double(m_width) / double(m_num_hashes)) * kappa));
+    // use m/n =1 worst then
+    m_num_hashes = int(ceil(kappa));
   }
 
   std::cout << "Bloom Filter  Parameter Summary :\n";
   std::cout << "\t ...  Allocated memory : "
-            << m_width * m_n_counting_bits * 1.25E-10 << " [Gb]\n";
+            << double(m_width * m_n_counting_bits) * 1.25E-10 << " [Gb]\n";
   std::cout << "\t ...  #of counting bits = " << double(m_n_counting_bits)
             << "\n";
   std::cout << "\t ...  m = " << double(m_width) << "\n";
 
   std::cout << "\t ...  k = " << m_num_hashes << "\n";
-  std::cout << "\t ...  m/n = " << (double(m_width) / n) << "\n";
+  std::cout << "\t ...  m/n = " << (double(m_width) / double(n)) << "\n";
   std::cout << " \t ... n_saturated " << double(m_n_max) << "\n\n";
 
   m_bits = std::make_unique<Bits>(m_width * m_n_counting_bits);

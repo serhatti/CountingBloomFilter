@@ -10,7 +10,7 @@
 
 #include "Hasher.h"
 
-int main(int argc, char **argv) {
+int main() {
   const char *dict = std::getenv("BF_DICT");
   auto words_file = std::ifstream(dict);
   if (!words_file) {
@@ -24,18 +24,16 @@ int main(int argc, char **argv) {
   std::unordered_set<std::string> unique_words;
 
   std::string line;
-  int insert_count = 0;
   while (getline(words_file, line)) {
     if (line[0] == '#' || line[0] == '/')
       continue;
     unique_words.insert(line);
   }
-  insert_count = unique_words.size();
   for (auto w : unique_words) {
     hash_values.insert(hasher(w));
   }
 
-  std::cout << "#of inserts=" << insert_count
+  std::cout << "#of inserts=" << unique_words.size()
             << " # of unique hashes=" << hash_values.size() << std::endl;
   auto endclk = std::chrono::high_resolution_clock::now();
   std::cout << "execution took "
