@@ -18,14 +18,11 @@
 
 #include "Hasher.h"
 
-/*Given a desired false positive rate and # of expected inserts along with a
-counting theta : Get  # of  necessary memory bits and optimal # of hash
-functions. If it turns out that the memory is not sufficient for the optimal
-values then use the most available ram  (set to 6Gb TODO: make it dynamic )
+/*
 ------------------------------------------------------------------------------------------
 1) Kappa star values taken from :
 Kim K, Jeong Y, Lee Y, Lee S. Analysis of Counting Bloom Filters Used for Count
-thetaing. Electronics. 2019; 8(7):779.
+thresholding. Electronics. 2019; 8(7):779.
 https://doi.org/10.3390/electronics8070779
 ------------------------------------------------------------------------------------------
 2) False positives for regular conting Bloom Filters taken from :
@@ -36,44 +33,19 @@ and Comparisons
 ------------------------------------------------------------------------------------------
 */
 
-/* By defalt this class works with std::string and std::vector<int>
-To make it work with a custom type you need to specialize
-Hasher<Custom>::operator(). For example see 'CustomHasher.h' and 'test_custom'.
-
-For many custom types, combining  Hasher<std::string> and
-Hasher<std::vector<int>> should suffice. But for performance or other reasons
-you may want to specialize the Hasher for your custom type.
-*/
-
-/*
-given a desired false probability rate and  number of items, first compute the
-optimal values of width(m) and number of hashes(k) for a non-counting bloom
-filter thus finding the number of total necessary bits.
-
-If it turns out that the system has insufficient amount of memory then either
- quit immediately or:
- 1) Set the total number of bits to something that is at an acceptable level
-  (6Gb for eaxample)
- 2) Re-calculate the safe number of items(n) given this amount of memory
-  and number of hash functions(k) as calculated previously
- 3) warn the client or stop execution if #of insert operations exceeds the #of
-items set as in 2.
-*/
-
 // each bool in std::vector<bool> takes up 1 bit :
 // see : https://en.cppreference.com/w/cpp/container/vector_bool
 using Bits = std::vector<bool>;
 
-template <typename T>
-class CountingBloomFilter {
- public:
+template <typename T> class CountingBloomFilter {
+public:
   CountingBloomFilter(uint64_t, int, double = 0.03);
   ~CountingBloomFilter();
-  void Insert(const T& item);
-  uint64_t Count(const T& item) const;
+  void Insert(const T &item);
+  uint64_t Count(const T &item) const;
   uint64_t Counter() const;
 
- private:
+private:
   // m
   uint64_t m_width;
   // k
@@ -87,9 +59,9 @@ class CountingBloomFilter {
   Hasher<T> m_hasher;
 
   void AutoSetParameters(double n, double p = 0.03);
-  std::vector<uint64_t> BloomHash(const T&) const;
+  std::vector<uint64_t> BloomHash(const T &) const;
   std::vector<uint64_t> CounterBitIndices(uint64_t) const;
-  void IncrementCounter(const std::vector<uint64_t>&);
+  void IncrementCounter(const std::vector<uint64_t> &);
 };
 
 template <typename T>
@@ -101,8 +73,7 @@ CountingBloomFilter<T>::CountingBloomFilter(uint64_t n_expected,
   m_hasher = Hasher<T>();
 }
 
-template <typename T>
-CountingBloomFilter<T>::~CountingBloomFilter() {}
+template <typename T> CountingBloomFilter<T>::~CountingBloomFilter() {}
 
 template <typename T>
 void CountingBloomFilter<T>::AutoSetParameters(double n, double p) {
@@ -153,65 +124,60 @@ void CountingBloomFilter<T>::AutoSetParameters(double n, double p) {
 }
 
 template <typename T>
-std::vector<uint64_t> CountingBloomFilter<T>::BloomHash(const T& item) const {
+std::vector<uint64_t> CountingBloomFilter<T>::BloomHash(const T &item) const {
   std::vector<uint64_t> result(m_num_hashes);
   std::iota(result.begin(), result.end(), 0);
   std::for_each(result.begin(), result.end(),
-                [&item, this](uint64_t& n) { n = m_hasher(item, n); });
+                [&item, this](uint64_t &n) { n = m_hasher(item, n); });
   return result;
 }
 
-template <typename T>
-uint64_t CountingBloomFilter<T>::Counter() const {
+template <typename T> uint64_t CountingBloomFilter<T>::Counter() const {
   return m_insert_counter;
 }
 
 template <typename T>
-std::vector<uint64_t> CountingBloomFilter<T>::CounterBitIndices(
-    uint64_t hashvalue) const {
+std::vector<uint64_t>
+CountingBloomFilter<T>::CounterBitIndices(uint64_t hashvalue) const {
   uint64_t counter_index = hashvalue % m_width;
   std::vector<uint64_t> indices(m_n_counting_bits);
   std::iota(indices.begin(), indices.end(), 0);
   std::for_each(
       indices.begin(), indices.end(),
-      [&counter_index, this](uint64_t& n) { n = counter_index + n * m_width; });
+      [&counter_index, this](uint64_t &n) { n = counter_index + n * m_width; });
   return indices;
 }
 
 template <typename T>
 void CountingBloomFilter<T>::IncrementCounter(
-    const std::vector<uint64_t>& counter_bit_indices) {
-  // k is the position of the rightmost zero bit.Remember the bits are
-  // traversed in reverse order.
+    const std::vector<uint64_t> &counter_bit_indices) {
   auto kpos =
       std::find_if(counter_bit_indices.rbegin(), counter_bit_indices.rend(),
-                   [this](const auto& i) { return (*m_bits)[i] == 0; });
-  if (kpos == counter_bit_indices.rend()) return;  // counter is saturated
-  // set kth bit to one
+                   [this](const auto &i) { return (*m_bits)[i] == 0; });
+  if (kpos == counter_bit_indices.rend())
+    return; // counter is saturated
   (*m_bits)[*kpos] = 1;
-  // then flip any  bits beyond "k"
   std::for_each(counter_bit_indices.rbegin(), kpos,
-                [this](const uint64_t& j) { (*m_bits)[j] = !(*m_bits)[j]; });
+                [this](const uint64_t &j) { (*m_bits)[j] = !(*m_bits)[j]; });
   return;
 }
 
-template <typename T>
-void CountingBloomFilter<T>::Insert(const T& item) {
-  for (const uint64_t& hash_value : BloomHash(item)) {
+template <typename T> void CountingBloomFilter<T>::Insert(const T &item) {
+  for (const uint64_t &hash_value : BloomHash(item)) {
     IncrementCounter(CounterBitIndices(hash_value));
   }
   m_insert_counter++;
 }
 
 template <typename T>
-uint64_t CountingBloomFilter<T>::Count(const T& item) const {
-  int min_count = (1 << m_n_counting_bits) - 1;  // full counter value
-  for (const uint64_t& hash_value : BloomHash(item)) {
+uint64_t CountingBloomFilter<T>::Count(const T &item) const {
+  int min_count = (1 << m_n_counting_bits) - 1; // full counter value
+  for (const uint64_t &hash_value : BloomHash(item)) {
     std::vector<uint64_t> indices = CounterBitIndices(hash_value);
     int curr_count = 0;
     int pow = 0;
     std::for_each(indices.rbegin(), indices.rend(),
-                  [&curr_count, &pow, this](const uint64_t& i) {
+                  [&curr_count, &pow, this](const uint64_t &i) {
                     curr_count += (*m_bits)[i] * (1 << pow);
                     pow++;
                   });
