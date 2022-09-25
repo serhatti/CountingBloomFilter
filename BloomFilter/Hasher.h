@@ -1,9 +1,4 @@
 /* Default hasher for the counting bloom filter.
-A desired number of  hash functions are obtained by
-adding offsets to the items to be hashed.
-Eg : h0(x) , h1(x)=h0(x(+)1) ... hi(x)=h1(x+(i))
-even and odd indices are treated differently
-
 author : Serhat Istin
        : istins@gmail.com
 */
