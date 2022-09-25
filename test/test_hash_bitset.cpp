@@ -15,17 +15,17 @@ std::uint64_t random_integer(uint64_t min, uint64_t max) {
   return distribution(generator);
 }
 
-std::vector<bool> rand_bitvec() {
+Bits rand_bitvec() {
   uint64_t num = random_integer(0, 0xFFFFFFFFFFFFFFFF);
   auto k = std::bitset<64>(num);
-  std::vector<bool> bit_vec(64);
+  Bits bit_vec(64);
   for (int i = 0; i < 64; ++i) {
     bit_vec[i] = k.test(i);
   }
   return bit_vec;
 }
 
-const auto bitvec_hasher = Hasher<std::vector<bool>>();
+const auto bitvec_hasher = Hasher<Bits>();
 
 int main() {
 
