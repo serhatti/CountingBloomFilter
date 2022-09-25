@@ -35,12 +35,11 @@ int main() {
   std::unordered_set<uint64_t> hash_values;
   std::unordered_set<Bits> unique_items;
   for (uint64_t i = 0; i < Nitems; i++) {
-    auto v = rand_bitvec();
-    unique_items.insert(rand_bitvec());
+    unique_items.emplace(rand_bitvec());
   }
 
   for (const auto &el : unique_items) {
-    hash_values.insert(bitvec_hasher(el, offset));
+    hash_values.emplace(bitvec_hasher(el, offset));
   }
 
   std::cout << "# of unique bitsets = " << unique_items.size()

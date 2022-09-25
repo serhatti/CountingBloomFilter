@@ -27,10 +27,10 @@ int main() {
   while (getline(words_file, line)) {
     if (line[0] == '#' || line[0] == '/')
       continue;
-    unique_words.insert(line);
+    unique_words.emplace(line);
   }
   for (auto w : unique_words) {
-    hash_values.insert(hasher(w));
+    hash_values.emplace(hasher(w));
   }
 
   std::cout << "#of inserts=" << unique_words.size()
